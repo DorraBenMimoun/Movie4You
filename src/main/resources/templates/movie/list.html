@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Liste des Films</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+</head>
+<body>
+
+<!-- Barre de navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/">Movie4You</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/movie/all">Films</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/cinema/all">Cinémas</a>
+                </li>
+                <li class="nav-item" th:if="${session.roles != null and #lists.contains(session.roles, 'ROLE_ADMIN')}">
+                    <a class="nav-link" href="/seance/all">Seances</a>
+                </li>
+                <li class="nav-item" th:if="${session.roles != null and #lists.contains(session.roles, 'ROLE_ADMIN')}">
+                    <a class="nav-link" href="/signalements/all">Signalements</a>
+                </li>
+
+                <li class="nav-item" th:if="${session.username == null}">
+                    <a class="nav-link" href="/users/register">S'inscrire</a>
+                </li>
+                <li class="nav-item" th:if="${session.username == null}">
+                    <a class="nav-link" href="/users/login">Se connecter</a>
+                </li>
+                <li class="nav-item" th:if="${session.roles != null and #lists.contains(session.roles, 'ROLE_USER')}">
+                    <a class="nav-link" href="/users/user">Profil</a>
+                </li>
+                <li class="nav-item" th:if="${session.username != null}">
+                    <a href="/users/logout" class="btn btn-danger btn-sm">Se déconnecter</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-5">
+    <h3>Liste des Films</h3>
+
+    <!-- Message si aucun film n'est trouvé -->
+    <div th:if="${movies.isEmpty()}">
+        <p>Aucun film trouvé.</p>
+    </div>
+
+    <!-- Bouton pour ajouter un film -->
+    <a href="/movie/create" th:if="${session.roles != null and #lists.contains(session.roles, 'ROLE_ADMIN')}" class="btn btn-primary mb-3"><i class="fas fa-plus-circle ml-2"></i> Ajouter un Film</a>
+
+    <!-- Affichage des films -->
+    <div th:unless="${movies.isEmpty()}">
+        <table class="table table-bordered">
+            <thead class="thead-dark">
+            <tr>
+                <th>ID</th>
+                <th>Nom</th>
+                <th>Date de sortie</th>
+                <th>Durée</th>
+                <th>Genre</th>
+                <th>Réalisateur</th>
+                <th>Actions</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="movie : ${movies}">
+                <td th:text="${movie.id}"></td>
+                <td th:text="${movie.name}"></td>
+                <td th:text="${movie.releaseDate}"></td>
+                <td th:text="${movie.duration}"></td>
+
+                <td th:text="${movie.genre}"></td>
+                <td th:text="${movie.realisateur}"></td>
+                <td>
+                    <!-- Détails, Modifier, Supprimer -->
+                    <a th:href="@{/movie/{id}(id=${movie.id})}" class="btn btn-info btn-sm">
+                        <i class="fas fa-info-circle"></i> Détails
+                    </a>
+                    <a th:href="@{/movie/edit/{id}(id=${movie.id})}" th:if="${session.roles != null and #lists.contains(session.roles, 'ROLE_ADMIN')}"  class="btn btn-warning btn-sm">
+                        <i class="fas fa-edit"></i> Modifier
+                    </a>
+                    <a th:href="@{/movie/delete/{id}(id=${movie.id})}"  th:if="${session.roles != null and #lists.contains(session.roles, 'ROLE_ADMIN')}"  class="btn btn-danger btn-sm"
+                       th:onclick="'return confirm(\'Voulez-vous vraiment supprimer ce film ?\')'">
+                        <i class="fas fa-trash-alt"></i> Supprimer
+                    </a>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+</body>
+</html>

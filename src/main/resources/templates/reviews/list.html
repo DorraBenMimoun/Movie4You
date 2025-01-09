@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="x-ua-compatible" content="ie=edge">
+  <title>Toutes les critiques</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+</head>
+<body>
+<div class="container my-5">
+  <h1 class="mb-4">Toutes les critiques</h1>
+
+  <!-- Afficher un message si aucune critique n'est trouvée -->
+  <div th:if="${reviews.isEmpty()}">
+    <p>Aucune critique trouvée.</p>
+  </div>
+
+  <!-- Afficher les critiques si elles existent -->
+  <div th:unless="${reviews.isEmpty()}">
+    <ul class="list-group">
+      <li th:each="review : ${reviews}" class="list-group-item">
+        <div class="d-flex justify-content-between">
+          <div>
+            <p><strong>Utilisateur :</strong> <span th:text="${review.user.name}"></span></p>
+            <p><strong>Film :</strong> <span th:text="${review.movie.name}"></span></p>
+            <p><strong>Contenu :</strong> <span th:text="${review.content}"></span></p>
+          </div>
+          <div class="align-self-center">
+            <a th:href="@{/reviews/delete/{id}(id=${review.id})}" class="btn btn-danger btn-sm">
+              <i class="fas fa-trash-alt"></i> Supprimer
+            </a>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+
+  <br>
+  <a href="/reviews/add" class="btn btn-primary">Ajouter une critique</a>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js"></script>
+</body>
+</html>

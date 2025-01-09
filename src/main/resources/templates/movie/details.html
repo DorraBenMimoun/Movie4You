@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>Détails du Film</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .container {
+            max-width: 900px;
+        }
+        .card-body {
+            background-color: #fff;
+        }
+        .movie-poster {
+            max-width: 100%;
+            border-radius: 5px;
+        }
+        .review-card {
+            margin-bottom: 20px;
+        }
+        .review-form {
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .review-actions button {
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+<!-- Barre de navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <div class="container">
+        <a class="navbar-brand fw-bold" href="/">Movie4You</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="/movie/all">Films</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/cinema/all">Cinémas</a>
+                </li>
+                <li class="nav-item" th:if="${session.roles != null and #lists.contains(session.roles, 'ROLE_ADMIN')}">
+                    <a class="nav-link" href="/seance/all">Seances</a>
+                </li>
+                <li class="nav-item" th:if="${session.roles != null and #lists.contains(session.roles, 'ROLE_ADMIN')}">
+                    <a class="nav-link" href="/signalements/all">Signalements</a>
+                </li>
+
+                <li class="nav-item" th:if="${session.username == null}">
+                    <a class="nav-link" href="/users/register">S'inscrire</a>
+                </li>
+                <li class="nav-item" th:if="${session.username == null}">
+                    <a class="nav-link" href="/users/login">Se connecter</a>
+                </li>
+                <li class="nav-item" th:if="${session.roles != null and #lists.contains(session.roles, 'ROLE_USER')}">
+                    <a class="nav-link" href="/users/user">Profil</a>
+                </li>
+                <li class="nav-item" th:if="${session.username != null}">
+                    <a href="/users/logout" class="btn btn-danger btn-sm">Se déconnecter</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+
+<div class="container my-5">
+    <h1 class="text-center mb-4" th:text="${movie.name}">Nom du film</h1>
+
+    <!-- Card contenant les informations du film -->
+    <div class="card mb-4">
+        <div class="row no-gutters">
+            <div class="col-md-4">
+                <img th:src="@{/uploads/{filename}(filename=${movie.posters})}" th:alt="@{/uploads/{filename}(filename=${movie.posters})}" width="100" />
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title">Détails du Film</h5>
+                    <p><strong>Date de sortie :</strong> <span th:text="${movie.releaseDate}">Date</span></p>
+                    <p><strong>Durée :</strong> <span th:text="${movie.duration}">Durée</span> minutes</p>
+                    <p><strong>Genre :</strong> <span th:text="${movie.genre}">Genre</span></p>
+                    <p><strong>Résume :</strong> <span th:text="${movie.plots}">Synopsis</span></p>
+                    <p><strong>Acteurs :</strong> <span th:text="${movie.actors}">Acteurs</span></p>
+                    <p><strong>Réalisateur :</strong> <span th:text="${movie.realisateur}">Réalisateur</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section Critiques -->
+    <div class="reviews-section mt-5">
+        <h4><strong>Critiques :</strong></h4>
+        <!-- Formulaire pour ajouter une critique -->
+        <div class="card mt-4">
+            <div class="card-header bg-primary text-white">
+                <h4><strong>Ajouter une Critique :</strong></h4>
+            </div>
+            <div class="card-body">
+                <form action="/reviews/add" method="post">
+
+                    <!-- Champ caché pour l'ID du film -->
+                    <input type="hidden" name="movieId" th:value="${movie.id}" />
+
+                    <!-- Contenu de la critique -->
+                    <div class="form-group">
+                        <label for="reviewContent">Critique :</label>
+                        <textarea id="reviewContent" name="content" class="form-control" rows="4" required></textarea>
+                    </div>
+
+                    <!-- Bouton Ajouter la critique -->
+                    <button type="submit" class="btn btn-success btn-block">Ajouter la critique</button>
+                </form>
+            </div>
+        </div>
+
+        <div th:if="${#lists.isEmpty(movie.reviews)}" class="alert alert-info">Aucune critique trouvée pour ce film.</div>
+        <ul class="list-unstyled">
+            <li th:each="review : ${movie.reviews}" class="review-card">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Critique ID: <span th:text="${review.id}"></span></h5>
+                        <p><strong>User :</strong> <span th:text="${review.user.username}"></span></p>
+                        <p><strong>Contenu de la critique :</strong> <span th:text="${review.content}"></span></p>
+                        <p><strong>Date de la critique :</strong> <span th:text="${review.reviewDate}"></span></p>
+                        <p><strong>Nombre de likes :</strong> <span th:text="${review.likeCount}"></span></p>
+
+                        <!-- Formulaires de Like et Unlike -->
+                        <div class="review-actions mt-3">
+                            <form action="/like" method="post" class="review-form" style="display:inline;">
+                                <input type="hidden" name="userId" th:value="${review.user.id}"> <!-- id utilisateur -->
+                                <input type="hidden" name="reviewId" th:value="${review.id}">
+                                <input type="hidden" name="movieId" th:value="${movie.id}">
+                                <button type="submit" class="btn btn-success">Like</button>
+                            </form>
+
+                            <form action="/unlike" method="post" class="review-form" style="display:inline;">
+                                <input type="hidden" name="userId" th:value="${review.user.id}"> <!-- id utilisateur -->
+                                <input type="hidden" name="reviewId" th:value="${review.id}">
+                                <input type="hidden" name="movieId" th:value="${movie.id}">
+                                <button type="submit" class="btn btn-danger">Unlike</button>
+                            </form>
+
+                            <!-- Formulaire Signalement -->
+                            <form th:action="@{/signalement/create}" method="post" class="review-form" style="display:inline;">
+                                <input type="hidden" name="userId" th:value="${review.user.id}">
+                                <input type="hidden" name="reviewId" th:value="${review.id}">
+                                <input type="hidden" name="movieId" th:value="${movie.id}">
+                                <input type="hidden" id="raison" name="raison" value=""> <!-- Le champ raison sera mis à jour dans la modale -->
+                                <button type="button" class="btn btn-warning"
+                                        th:data-review-id="${review.id}"
+                                        th:data-review-content="${review.content}"
+                                        th:data-review-user="${review.user.username}"
+                                        th:data-review-userId="${review.user.id}"
+                                        th:data-movie-id="${movie.id}"
+                                        onclick="openSignalementModal(this)">Signaler</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </li>
+        </ul>
+    </div>
+
+    <div class="mt-4 text-center" >
+        <a href="/movie/all" class="btn btn-secondary">Retour à la liste</a>
+        <a th:href="@{/movie/edit/{id}(id=${movie.id})}"  th:if="${session.roles != null and #lists.contains(session.roles, 'ROLE_ADMIN')}" class="btn btn-primary">Modifier</a>
+    </div>
+
+</div>
+
+<!-- Modale pour signaler une critique -->
+<div class="modal fade" id="signalementModal" tabindex="-1" role="dialog" aria-labelledby="signalementModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="signalementModalLabel">Signaler une Critique</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form id="signalementForm" action="/signalements/create" method="post">
+
+            <div class="modal-body">
+                <!-- Affichage des détails de la critique et de l'utilisateur -->
+                <div id="reviewDetails">
+                    <p><strong>Utilisateur : </strong><span id="reviewUser"></span></p>
+                    <p><strong>Critique : </strong><span id="reviewContentModal"></span></p>
+                        <input type="hidden" id="signalementReviewId" name="reviewId">
+                        <!-- Formulaire pour la raison de signalement -->
+                        <div class="form-group">
+                            <label for="raison">Raison :</label>
+                            <textarea class="form-control" id="raisonModal" name="raison" rows="3" required></textarea>
+                        </div>
+
+                </div>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                <button type="submit" class="btn btn-warning">Envoyer le signalement</button>
+            </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // Fonction pour ouvrir la modale et remplir les détails
+    function openSignalementModal(button) {
+        var reviewId = button.getAttribute('data-review-id');
+        var reviewContent = button.getAttribute('data-review-content');
+        var reviewUser = button.getAttribute('data-review-user');
+
+        document.getElementById('reviewContentModal').innerText = reviewContent;
+        document.getElementById('reviewUser').innerText = reviewUser;
+
+        document.getElementById('signalementReviewId').value = reviewId;
+
+        document.getElementById('raisonModal').value = ""; // Réinitialiser le champ raison
+
+        $('#signalementModal').modal('show');
+    }
+
+
+</script>
+
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
