@@ -2,6 +2,7 @@ package org.example.springsecurity.Service;
 
 
 import org.example.springsecurity.Models.MovieEntity;
+import org.example.springsecurity.Models.SeanceEntity;
 import org.example.springsecurity.Repositories.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -69,4 +70,5 @@ public class MovieService {
     public List<MovieEntity> searchMoviesByName(String name) {
         return movieRepository.findByNameContainingIgnoreCase(name);
     }
+
 }

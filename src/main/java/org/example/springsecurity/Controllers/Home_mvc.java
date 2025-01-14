@@ -42,6 +42,6 @@ public class Home_mvc {
         List<MovieEntity> searchResults = movieService.searchMoviesByName(query);
         model.addAttribute("movies", searchResults);
         model.addAttribute("query", query);  // Pour afficher la requête dans le champ de recherche
-        return "home";
+        return "home/home";
     }
 }

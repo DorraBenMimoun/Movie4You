@@ -9,4 +9,5 @@ public interface SeanceRepository extends JpaRepository<SeanceEntity, Integer> {
 
     List<SeanceEntity> findByCinemaId(int cinemaId);
 
+    List<SeanceEntity> findByMovieId(Integer id);
 }

@@ -56,11 +56,4 @@ public class UserDTO {
         this.email = email;
     }
 
-    public String getProfilepic() {
-        return profilepic;
-    }
-
-    public void setProfilepic(String profilepic) {
-        this.profilepic = profilepic;
-    }
 }

@@ -7,43 +7,8 @@
     <title>User Details - Movie4You</title>
 </head>
 <body>
-<!-- Barre de navigation -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="/">Movie4You</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="/movie/all">Films</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/cinema/all">Cinémas</a>
-                </li>
-                <li class="nav-item" th:if="${session.roles != null and #lists.contains(session.roles, 'ROLE_ADMIN')}">
-                    <a class="nav-link" href="/seance/all">Séances</a>
-                </li>
-                <li class="nav-item" th:if="${session.roles != null and #lists.contains(session.roles, 'ROLE_ADMIN')}">
-                    <a class="nav-link" href="/signalements/all">Signalements</a>
-                </li>
-                <li class="nav-item" th:if="${session.username == null}">
-                    <a class="nav-link" href="/users/register">S'inscrire</a>
-                </li>
-                <li class="nav-item" th:if="${session.username == null}">
-                    <a class="nav-link" href="/users/login">Se connecter</a>
-                </li>
-                <li class="nav-item" th:if="${session.roles != null and #lists.contains(session.roles, 'ROLE_USER')}">
-                    <a class="nav-link" href="/users/user">Profil</a>
-                </li>
-                <li class="nav-item" th:if="${session.username != null}">
-                    <a href="/users/logout" class="btn btn-danger btn-sm">Se déconnecter</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
+<!-- Inclusion de la navbar -->
+<div th:insert="~{fragments/navbar :: navbar}"></div>
 
 <!-- Contenu principal -->
 <div class="container mt-5" th:if="${session.user}">
@@ -57,11 +22,9 @@
                     <div class="mb-3">
                         <p><strong>Nom d'utilisateur:</strong> <span th:text="${user.username}"></span></p>
                     </div>
+
                     <div class="mb-3">
                         <p><strong>Email:</strong> <span th:text="${user.email}"></span></p>
-                    </div>
-                    <div class="mb-3">
-                        <p><strong>ID:</strong> <span th:text="${user.id}"></span></p>
                     </div>
                     <div class="mb-3">
                         <p><strong>Rôles:</strong>

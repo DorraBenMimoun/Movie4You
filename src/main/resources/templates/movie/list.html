@@ -5,99 +5,96 @@
     <title>Liste des Films</title>
     <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.4.1/css/all.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-
+    <style>
+        .movie-card {
+            position: relative;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        .movie-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+        .movie-poster {
+            height: 300px;
+            object-fit: cover;
+        }
+        .btn-circle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+        }
+        .delete-icon {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background-color: rgba(255, 255, 255, 0.8);
+            border: none;
+            padding: 5px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-
-<!-- Barre de navigation -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-    <div class="container">
-        <a class="navbar-brand fw-bold" href="/">Movie4You</a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item">
-                    <a class="nav-link" href="/movie/all">Films</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="/cinema/all">Cinémas</a>
-                </li>
-                <li class="nav-item" th:if="${session.roles != null and #lists.contains(session.roles, 'ROLE_ADMIN')}">
-                    <a class="nav-link" href="/seance/all">Seances</a>
-                </li>
-                <li class="nav-item" th:if="${session.roles != null and #lists.contains(session.roles, 'ROLE_ADMIN')}">
-                    <a class="nav-link" href="/signalements/all">Signalements</a>
-                </li>
-
-                <li class="nav-item" th:if="${session.username == null}">
-                    <a class="nav-link" href="/users/register">S'inscrire</a>
-                </li>
-                <li class="nav-item" th:if="${session.username == null}">
-                    <a class="nav-link" href="/users/login">Se connecter</a>
-                </li>
-                <li class="nav-item" th:if="${session.roles != null and #lists.contains(session.roles, 'ROLE_USER')}">
-                    <a class="nav-link" href="/users/user">Profil</a>
-                </li>
-                <li class="nav-item" th:if="${session.username != null}">
-                    <a href="/users/logout" class="btn btn-danger btn-sm">Se déconnecter</a>
-                </li>
-            </ul>
-        </div>
-    </div>
-</nav>
+<!-- Inclusion de la navbar -->
+<div th:insert="~{fragments/navbar :: navbar}"></div>
 
 <div class="container my-5">
-    <h3>Liste des Films</h3>
+    <h3 class="mb-4">Liste des Films</h3>
 
     <!-- Message si aucun film n'est trouvé -->
-    <div th:if="${movies.isEmpty()}">
-        <p>Aucun film trouvé.</p>
+    <div th:if="${movies.isEmpty()}" class="text-center">
+        <p class="text-muted">Aucun film trouvé.</p>
     </div>
 
     <!-- Bouton pour ajouter un film -->
-    <a href="/movie/create" th:if="${session.roles != null and #lists.contains(session.roles, 'ROLE_ADMIN')}" class="btn btn-primary mb-3"><i class="fas fa-plus-circle ml-2"></i> Ajouter un Film</a>
+    <div class="mb-4" th:if="${session.roles != null and #lists.contains(session.roles, 'ROLE_ADMIN')}">
+        <a href="/movie/create" class="btn btn-primary">
+            <i class="fas fa-plus-circle"></i> Ajouter un Film
+        </a>
+    </div>
 
-    <!-- Affichage des films -->
-    <div th:unless="${movies.isEmpty()}">
-        <table class="table table-bordered">
-            <thead class="thead-dark">
-            <tr>
-                <th>ID</th>
-                <th>Nom</th>
-                <th>Date de sortie</th>
-                <th>Durée</th>
-                <th>Genre</th>
-                <th>Réalisateur</th>
-                <th>Actions</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="movie : ${movies}">
-                <td th:text="${movie.id}"></td>
-                <td th:text="${movie.name}"></td>
-                <td th:text="${movie.releaseDate}"></td>
-                <td th:text="${movie.duration}"></td>
+    <!-- Affichage des films sous forme de cards -->
+    <div class="row g-4" th:unless="${movies.isEmpty()}">
+        <div class="col-md-4" th:each="movie : ${movies}">
+            <div class="card movie-card">
+                <img th:src="@{/uploads/{filename}(filename=${movie.posters})}"
+                     th:alt="@{/uploads/{filename}(filename=${movie.posters})}"
+                     class="card-img-top movie-poster">
 
-                <td th:text="${movie.genre}"></td>
-                <td th:text="${movie.realisateur}"></td>
-                <td>
-                    <!-- Détails, Modifier, Supprimer -->
-                    <a th:href="@{/movie/{id}(id=${movie.id})}" class="btn btn-info btn-sm">
-                        <i class="fas fa-info-circle"></i> Détails
-                    </a>
-                    <a th:href="@{/movie/edit/{id}(id=${movie.id})}" th:if="${session.roles != null and #lists.contains(session.roles, 'ROLE_ADMIN')}"  class="btn btn-warning btn-sm">
-                        <i class="fas fa-edit"></i> Modifier
-                    </a>
-                    <a th:href="@{/movie/delete/{id}(id=${movie.id})}"  th:if="${session.roles != null and #lists.contains(session.roles, 'ROLE_ADMIN')}"  class="btn btn-danger btn-sm"
-                       th:onclick="'return confirm(\'Voulez-vous vraiment supprimer ce film ?\')'">
-                        <i class="fas fa-trash-alt"></i> Supprimer
-                    </a>
-                </td>
-            </tr>
-            </tbody>
-        </table>
+                <!-- Bouton supprimer en haut à droite -->
+                <button th:href="@{/movie/delete/{id}(id=${movie.id})}"
+                        th:if="${session.roles != null and #lists.contains(session.roles, 'ROLE_ADMIN')}"
+                        class="delete-icon btn btn-light bg-danger btn-lg text-white btn-circle"
+                        th:onclick="'return confirm(\'Voulez-vous vraiment supprimer ce film ?\')'">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+
+                <div class="card-body">
+                    <h5 class="card-title" th:text="${movie.name}"></h5>
+                    <p class="card-text text-muted">
+                        <strong>Date de sortie:</strong> <span th:text="${movie.releaseDate}"></span><br>
+                        <strong>Durée:</strong> <span th:text="${movie.duration}"></span> min<br>
+                        <strong>Genre:</strong> <span th:text="${movie.genre}"></span><br>
+                        <strong>Réalisateur:</strong> <span th:text="${movie.realisateur}"></span>
+                    </p>
+                    <div class="d-flex align-items-center gap-2">
+                        <a th:href="@{/movie/{id}(id=${movie.id})}" class="btn btn-info btn-lg w-full">
+                             Voir
+                        </a>
+                        <a th:href="@{/movie/edit/{id}(id=${movie.id})}"
+                           th:if="${session.roles != null and #lists.contains(session.roles, 'ROLE_ADMIN')}"
+                           class="btn btn-warning btn-circle">
+                            <i class="fas fa-paint-brush"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 

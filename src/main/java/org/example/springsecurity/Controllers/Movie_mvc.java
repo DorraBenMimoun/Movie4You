@@ -3,9 +3,11 @@ package org.example.springsecurity.Controllers;
 
 import org.example.springsecurity.Models.MovieEntity;
 import org.example.springsecurity.Models.ReviewEntity;
+import org.example.springsecurity.Models.SeanceEntity;
 import org.example.springsecurity.Models.User;
 import org.example.springsecurity.Repositories.MovieRepository;
 import org.example.springsecurity.Repositories.ReviewRepository;
+import org.example.springsecurity.Repositories.SeanceRepository;
 import org.example.springsecurity.Repositories.UserRepository;
 import org.example.springsecurity.Service.MovieService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +29,9 @@ public class Movie_mvc {
 
     @Autowired
     private MovieService movieService;
+
+    @Autowired
+    private SeanceRepository seanceRepository;
 
     @Autowired
     private MovieRepository movieRepository;
@@ -48,7 +54,7 @@ public class Movie_mvc {
     }
 
     @PostMapping("/create")
-    public String createMovie(@ModelAttribute MovieEntity movieInput, Model model,@RequestParam("posterFile") MultipartFile posterFile) {
+    public String createMovie(@ModelAttribute MovieEntity movieInput, Model model,@RequestParam("posterFile") MultipartFile posterFile, @RequestParam("wallpaperFile") MultipartFile wallpaperFile) {
 
         if (!posterFile.isEmpty()) {
             // Obtenir le chemin absolu du projet
@@ -71,6 +77,25 @@ public class Movie_mvc {
                 e.printStackTrace();
             }
         }
+
+
+        if(!wallpaperFile.isEmpty()){
+            String projectDir = System.getProperty("user.dir");
+            String uploadDir = projectDir + "/src/main/resources/static/uploads/";
+            String fileName = System.currentTimeMillis() + "_" + wallpaperFile.getOriginalFilename();
+            File file = new File(uploadDir + fileName);
+            if (!file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
+            }
+            try {
+                wallpaperFile.transferTo(file);
+                movieInput.setWallpaper(fileName);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+
         movieRepository.save(movieInput);
         return "redirect:/movie/all";
     }
@@ -84,6 +109,7 @@ public class Movie_mvc {
             System.out.println("posters"+movieOptional.get().getPosters());
             model.addAttribute("movie", movieOptional.get());
             model.addAttribute("users", userRepository.findAll());
+            model.addAttribute("seances", seanceRepository.findByMovieId(id));
 
             return "movie/details";
         }
@@ -103,7 +129,7 @@ public class Movie_mvc {
     }
 
     @PostMapping("/edit/{id}")
-    public String editMovie(@PathVariable("id") Integer id, @ModelAttribute MovieEntity movieInput, @RequestParam(value = "posterFile", required = false) MultipartFile posterFile, Model model) {
+    public String editMovie(@PathVariable("id") Integer id, @ModelAttribute MovieEntity movieInput, @RequestParam(value = "posterFile", required = false) MultipartFile posterFile,  @RequestParam(value = "wallpaperFile", required = false) MultipartFile wallpaperFile, Model model) {
         Optional<MovieEntity> optionalMovie = movieRepository.findById(id);
         if (!optionalMovie.isPresent()) {
             model.addAttribute("error", "Movie not found!");
@@ -128,6 +154,22 @@ public class Movie_mvc {
             try {
                 posterFile.transferTo(file);
                 existingMovie.setPosters(fileName); // Mise à jour du nom du fichier
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        if(wallpaperFile != null && !wallpaperFile.isEmpty()){
+            String projectDir = System.getProperty("user.dir");
+            String uploadDir = projectDir + "/src/main/resources/static/uploads/";
+            String fileName = System.currentTimeMillis() + "_" + wallpaperFile.getOriginalFilename();
+            File file = new File(uploadDir + fileName);
+            if (!file.getParentFile().exists()) {
+                file.getParentFile().mkdirs();
+            }
+            try {
+                wallpaperFile.transferTo(file);
+                existingMovie.setWallpaper(fileName);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -161,6 +203,8 @@ public class Movie_mvc {
 
         if (movieInput.getPosters() != null)
             existingMovie.setPosters(movieInput.getPosters());
+        if (movieInput.getWallpaper() != null)
+            existingMovie.setWallpaper(movieInput.getWallpaper());
         if (movieInput.getGenre() != null)
             existingMovie.setGenre(movieInput.getGenre());
         if (movieInput.getPlots() != null)

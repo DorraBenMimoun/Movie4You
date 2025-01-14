@@ -36,11 +36,15 @@ public class MovieEntity {
     @Column
     private String posters;
 
+    @Column
+    private String wallpaper;
 
     @Column
     private String genre;
 
-    @Column
+
+    // Taille max 5000 characters
+    @Column (length = 5000)
     private String plots;
 
     @Column

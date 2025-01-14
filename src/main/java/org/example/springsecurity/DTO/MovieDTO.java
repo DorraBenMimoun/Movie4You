@@ -26,7 +26,7 @@ public class MovieDTO {
     private Integer duration;
 
 
-    @NotNull(message = "Posters URL is required")
+    @NotNull(message = "Posters File is required")
     private String posters;
 
     @NotNull(message = "Genre is required")
